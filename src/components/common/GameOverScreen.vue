@@ -1,5 +1,6 @@
 <script setup>
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
+import { useConfetti } from '@/composables/useConfetti'
 
 const props = defineProps({
   score: { type: Number, required: true },
@@ -9,11 +10,17 @@ const props = defineProps({
 
 const emit = defineEmits(['play-again', 'go-home'])
 
+const { launch } = useConfetti()
+
 const stars = computed(() => {
   const ratio = props.score / props.total
   if (ratio === 1) return '🌟🌟🌟'
   if (ratio >= 0.7) return '⭐⭐'
   return '⭐'
+})
+
+onMounted(() => {
+  if (props.score === props.total) launch()
 })
 </script>
 

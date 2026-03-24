@@ -14,6 +14,7 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
   const questionsRef = isRef(questionsOrRef) ? questionsOrRef : ref(questionsOrRef)
 
   const score = ref(0)
+  const streak = ref(0)
   const currentIndex = ref(0)
   const retriesLeft = ref(MAX_RETRIES)
   const feedback = ref(null) // 'correct' | 'wrong' | null
@@ -46,6 +47,7 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
 
     if (isCorrectAnswer(currentQuestion.value, input)) {
       score.value++
+      streak.value++
       feedback.value = 'correct'
       isTransitioning.value = true
       setTimeout(() => {
@@ -54,6 +56,7 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
       }, FEEDBACK_DURATION_MS)
     } else {
       retriesLeft.value--
+      streak.value = 0
       feedback.value = 'wrong'
       isTransitioning.value = true
       setTimeout(() => {
@@ -78,6 +81,7 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
 
   function reset() {
     score.value = 0
+    streak.value = 0
     currentIndex.value = 0
     retriesLeft.value = MAX_RETRIES
     feedback.value = null
@@ -88,6 +92,7 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
 
   return {
     score,
+    streak,
     currentIndex,
     retriesLeft,
     feedback,
