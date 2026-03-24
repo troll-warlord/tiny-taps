@@ -9,6 +9,7 @@ const routes = [
   { path: '/alphabet', name: 'alphabet', component: AlphabetGameView },
   { path: '/counting', name: 'counting', component: CountingGameView },
   { path: '/colors', name: 'colors', component: ColorGameView },
+  { path: '/:pathMatch(.*)*', redirect: '/' },
 ]
 
 export default createRouter({
