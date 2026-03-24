@@ -28,45 +28,43 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
     Math.round(((currentIndex.value + 1) / questionsRef.value.length) * 100),
   )
 
-  function revealThenAdvance() {
-    if (revealAnswer) {
-      showReveal.value = true
-      setTimeout(() => {
-        showReveal.value = false
-        isTransitioning.value = false
-        moveToNext()
-      }, REVEAL_DURATION_MS)
-    } else {
-      isTransitioning.value = false
-      moveToNext()
-    }
-  }
-
   function submitAnswer(input) {
     if (isTransitioning.value || isGameOver.value) return
+    isTransitioning.value = true
+
+    // When revealAnswer is on, the word shows alongside the feedback icon
+    // and the advance waits for REVEAL_DURATION_MS total.
+    // When off (counting game), advance happens after FEEDBACK_DURATION_MS.
+    const advanceDelay = revealAnswer ? REVEAL_DURATION_MS : FEEDBACK_DURATION_MS
 
     if (isCorrectAnswer(currentQuestion.value, input)) {
       score.value++
       streak.value++
       feedback.value = 'correct'
-      isTransitioning.value = true
+      if (revealAnswer) showReveal.value = true
+      setTimeout(() => { feedback.value = null }, FEEDBACK_DURATION_MS)
       setTimeout(() => {
-        feedback.value = null
-        revealThenAdvance()
-      }, FEEDBACK_DURATION_MS)
+        showReveal.value = false
+        isTransitioning.value = false
+        moveToNext()
+      }, advanceDelay)
     } else {
       retriesLeft.value--
       streak.value = 0
       feedback.value = 'wrong'
-      isTransitioning.value = true
+      const lastAttempt = retriesLeft.value <= 0
+      if (lastAttempt && revealAnswer) showReveal.value = true
       setTimeout(() => {
         feedback.value = null
-        if (retriesLeft.value <= 0) {
-          revealThenAdvance()
-        } else {
-          isTransitioning.value = false
-        }
+        if (!lastAttempt) isTransitioning.value = false
       }, FEEDBACK_DURATION_MS)
+      if (lastAttempt) {
+        setTimeout(() => {
+          showReveal.value = false
+          isTransitioning.value = false
+          moveToNext()
+        }, advanceDelay)
+      }
     }
   }
 
