@@ -54,6 +54,13 @@ function handleKeydown(event) {
     event.preventDefault()
   }
 }
+
+// iOS keyboard dismiss fires blur — submit if word is fully typed
+function handleBlur() {
+  if (props.isEnabled && isFull.value) {
+    emit('submit', typed.value.join(''))
+  }
+}
 </script>
 
 <template>
@@ -65,10 +72,10 @@ function handleKeydown(event) {
       type="text"
       inputmode="text"
       autocomplete="off"
-      :disabled="!isEnabled"
       aria-label="Type the color name"
       @input="handleInput"
       @keydown="handleKeydown"
+      @blur="handleBlur"
     />
 
     <!-- Letter slots -->

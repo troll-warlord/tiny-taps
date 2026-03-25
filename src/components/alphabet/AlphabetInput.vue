@@ -44,6 +44,13 @@ function handleKeydown(event) {
     event.preventDefault()
   }
 }
+
+// iOS keyboard "return" dismisses keyboard via blur — treat as submit
+function handleBlur() {
+  if (props.isEnabled && displayValue.value.length > 0) {
+    emit('submit', displayValue.value)
+  }
+}
 </script>
 
 <template>
@@ -68,10 +75,10 @@ function handleKeydown(event) {
       type="text"
       inputmode="text"
       autocomplete="off"
-      :disabled="!isEnabled"
       aria-label="Type the starting letter then press Enter"
       @input="handleInput"
       @keydown="handleKeydown"
+      @blur="handleBlur"
     />
 
     <p class="text-muted text-sm font-semibold">

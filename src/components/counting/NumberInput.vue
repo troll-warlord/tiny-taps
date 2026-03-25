@@ -44,6 +44,13 @@ function handleKeydown(event) {
     event.preventDefault()
   }
 }
+
+// iOS numpad "Done" button fires blur instead of Enter
+function handleBlur() {
+  if (props.isEnabled && displayValue.value.length > 0) {
+    emit('submit', displayValue.value)
+  }
+}
 </script>
 
 <template>
@@ -68,10 +75,10 @@ function handleKeydown(event) {
       class="sr-only"
       type="text"
       inputmode="numeric"
-      :disabled="!isEnabled"
       aria-label="Type the count then press Enter"
       @input="handleInput"
       @keydown="handleKeydown"
+      @blur="handleBlur"
     />
 
     <p class="text-muted text-sm font-semibold">
