@@ -65,7 +65,7 @@ function handleBlur() {
         {{ displayValue || '?' }}
       </p>
 
-      <!-- Overlay input: invisible but covers the full box — direct tap = native iOS keyboard -->
+      <!-- Overlay input: invisible but covers the full box - direct tap = native iOS keyboard -->
       <input
         ref="inputRef"
         type="text"

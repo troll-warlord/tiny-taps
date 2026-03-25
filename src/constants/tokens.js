@@ -1,4 +1,4 @@
-// Design tokens — single source of truth for colours, spacing and typography.
+// Design tokens - single source of truth for colours, spacing and typography.
 // These values are mirrored in tailwind.config.js so that both CSS utilities
 // and JS logic can consume the same scale.
 

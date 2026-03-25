@@ -1,4 +1,4 @@
-// Objects pool — add more entries here to increase variety.
+// Objects pool - add more entries here to increase variety.
 const OBJECTS = [
   { name: 'Ball', emoji: '⚽' },
   { name: 'Star', emoji: '⭐' },

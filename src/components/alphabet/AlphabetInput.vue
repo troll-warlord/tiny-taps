@@ -3,7 +3,7 @@ import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   isEnabled: { type: Boolean, default: true },
-  // Changes every new question — used to reset the display box cleanly
+  // Changes every new question - used to reset the display box cleanly
   questionKey: { type: Number, default: 0 },
 })
 
@@ -24,7 +24,7 @@ watch(() => props.isEnabled, (enabled) => {
   if (enabled) inputRef.value?.focus()
 })
 
-// No isEnabled guard here — always show typed letter so the box feels responsive
+// No isEnabled guard here - always show typed letter so the box feels responsive
 // even during the brief transition between questions
 function handleInput(event) {
   const ch = event.target.value.replace(/[^a-zA-Z]/g, '').slice(-1).toUpperCase()
@@ -72,7 +72,7 @@ function handleBlur() {
         {{ displayValue || '?' }}
       </p>
 
-      <!-- Overlay input: invisible but covers the full box — direct tap = native iOS keyboard -->
+      <!-- Overlay input: invisible but covers the full box - direct tap = native iOS keyboard -->
       <input
         ref="inputRef"
         type="text"

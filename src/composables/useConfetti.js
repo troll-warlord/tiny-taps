@@ -1,5 +1,5 @@
 /**
- * Pure-JS confetti burst — no external library.
+ * Pure-JS confetti burst - no external library.
  * Spawns canvas-based particles that fall and fade out, then removes the canvas.
  */
 export function useConfetti() {

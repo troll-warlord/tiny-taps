@@ -26,7 +26,7 @@ watch(() => props.isEnabled, (enabled) => {
   if (enabled) inputRef.value?.focus()
 })
 
-// No isEnabled guard — always update slots so typing feels instant
+// No isEnabled guard - always update slots so typing feels instant
 function handleInput(event) {
   const letters = event.target.value.replace(/[^a-zA-Z]/g, '')
   for (const ch of letters) {
@@ -48,7 +48,7 @@ function handleKeydown(event) {
   }
 }
 
-// iOS keyboard Done/Return fires blur — submit if word is full, re-focus to keep keyboard alive.
+// iOS keyboard Done/Return fires blur - submit if word is full, re-focus to keep keyboard alive.
 function handleBlur() {
   if (props.isEnabled && isFull.value) {
     emit('submit', typed.value.join(''))

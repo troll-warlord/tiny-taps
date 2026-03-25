@@ -12,7 +12,7 @@ defineProps({
 <template>
   <div class="flex flex-col items-center animate-fade-in-up w-full max-w-sm">
     <div class="bg-white rounded-3xl shadow-xl p-5 sm:p-8 text-center w-full">
-      <!-- Main visual — swap `emoji` for an <img> when real assets are ready -->
+      <!-- Main visual - swap `emoji` for an <img> when real assets are ready -->
       <div class="text-7xl sm:text-9xl leading-none mb-4 select-none" role="img" :aria-label="question.word">
         {{ question.emoji }}
       </div>
