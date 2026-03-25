@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   isEnabled: { type: Boolean, default: true },
@@ -10,18 +10,14 @@ const emit = defineEmits(['submit'])
 const inputRef = ref(null)
 const displayValue = ref('')
 
-// Reset display and re-focus whenever the question changes (isEnabled goes false→true)
-watch(
-  () => props.isEnabled,
-  async (enabled) => {
-    if (enabled) {
-      displayValue.value = ''
-      await nextTick()
-      inputRef.value?.focus()
-    }
-  },
-  { immediate: true },
-)
+onMounted(() => inputRef.value?.focus())
+
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) {
+    displayValue.value = ''
+    inputRef.value?.focus()
+  }
+})
 
 function handleInput(event) {
   if (!props.isEnabled) return
@@ -36,29 +32,24 @@ function handleKeydown(event) {
   if (event.key === 'Enter') {
     if (displayValue.value.length > 0) emit('submit', displayValue.value)
     event.preventDefault()
-    return
-  }
-
-  if (event.key === 'Backspace') {
+  } else if (event.key === 'Backspace') {
     displayValue.value = displayValue.value.slice(0, -1)
     event.preventDefault()
   }
 }
 
-// iOS numpad "Done" button fires blur instead of Enter
+// iOS numpad "Done" fires blur instead of Enter.
+// Submit + synchronously re-focus within the gesture to keep keyboard alive.
 function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
   }
-  // Re-focus synchronously inside the blur handler — this is still within
-  // the user gesture on iOS, so the keyboard stays visible for the next question
   inputRef.value?.focus()
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3">
-    <!-- Visible answer box — clicking it refocuses the hidden input -->
+  <div class="relative flex flex-col items-center gap-3">
     <div
       class="rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] cursor-text transition-colors"
       :class="isEnabled ? 'border-primary bg-white' : 'border-gray-300 bg-gray-100 opacity-60'"
@@ -72,24 +63,21 @@ function handleBlur() {
       </p>
     </div>
 
-    <!-- Hidden input captures keyboard events reliably across browsers -->
     <input
       ref="inputRef"
-      class="sr-only"
       type="text"
       inputmode="numeric"
-      aria-label="Type the count then press Enter"
+      autocomplete="off"
+      aria-label="Type the count"
+      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
       @input="handleInput"
       @keydown="handleKeydown"
       @blur="handleBlur"
     />
 
     <p class="text-muted text-sm font-semibold">
-      {{
-        isEnabled
-          ? '⌨️ Type the number, then press Enter ↵'
-          : '⏳ Get ready…'
-      }}
+      {{ isEnabled ? '⌨️ Type the number, then press Enter ↵' : '⏳ Get ready…' }}
     </p>
   </div>
 </template>
+

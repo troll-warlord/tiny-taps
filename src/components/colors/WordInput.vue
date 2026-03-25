@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, nextTick } from 'vue'
+import { ref, computed, watch, onMounted } from 'vue'
 
 const props = defineProps({
   wordLength: { type: Number, required: true },
@@ -13,21 +13,13 @@ const typed = ref([])
 
 const isFull = computed(() => typed.value.length === props.wordLength)
 
-// Reset slots and refocus whenever a new question begins
-watch(
-  () => props.isEnabled,
-  async (enabled) => {
-    if (enabled) {
-      typed.value = []
-      await nextTick()
-      inputRef.value?.focus()
-    }
-  },
-)
+onMounted(() => inputRef.value?.focus())
 
-onMounted(async () => {
-  await nextTick()
-  if (props.isEnabled) inputRef.value?.focus()
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) {
+    typed.value = []
+    inputRef.value?.focus()
+  }
 })
 
 function handleInput(event) {
@@ -46,41 +38,44 @@ function handleKeydown(event) {
   if (event.key === 'Enter') {
     if (isFull.value) emit('submit', typed.value.join(''))
     event.preventDefault()
-    return
-  }
-
-  if (event.key === 'Backspace') {
+  } else if (event.key === 'Backspace') {
     typed.value = typed.value.slice(0, -1)
     event.preventDefault()
   }
 }
 
-// iOS keyboard dismiss fires blur — submit if word is fully typed
+// iOS keyboard Done/Return fires blur — submit if word is full, re-focus to keep keyboard alive.
 function handleBlur() {
   if (props.isEnabled && isFull.value) {
     emit('submit', typed.value.join(''))
   }
-  // Re-focus synchronously — still within the iOS gesture, keeps keyboard alive
   inputRef.value?.focus()
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-4">
-    <!-- Hidden input to capture keyboard on mobile and desktop -->
+  <div class="relative flex flex-col items-center gap-4">
+    <!--
+      NOT sr-only: clip+overflow:hidden prevents iOS from showing the keyboard.
+      opacity-0 absolute 1px is invisible but remains fully focusable.
+    -->
     <input
       ref="inputRef"
-      class="sr-only"
       type="text"
       inputmode="text"
+      enterkeyhint="done"
       autocomplete="off"
+      autocorrect="off"
+      autocapitalize="none"
+      spellcheck="false"
       aria-label="Type the color name"
+      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
       @input="handleInput"
       @keydown="handleKeydown"
       @blur="handleBlur"
     />
 
-    <!-- Letter slots -->
+    <!-- Letter slots — tap anywhere to focus input -->
     <div class="flex gap-2 flex-wrap justify-center" @click="inputRef?.focus()">
       <div
         v-for="i in wordLength"

@@ -1,5 +1,5 @@
 <script setup>
-import { ref, watch, nextTick } from 'vue'
+import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   isEnabled: { type: Boolean, default: true },
@@ -10,17 +10,16 @@ const emit = defineEmits(['submit'])
 const inputRef = ref(null)
 const displayValue = ref('')
 
-watch(
-  () => props.isEnabled,
-  async (enabled) => {
-    if (enabled) {
-      displayValue.value = ''
-      await nextTick()
-      inputRef.value?.focus()
-    }
-  },
-  { immediate: true },
-)
+onMounted(() => inputRef.value?.focus())
+
+// Reset value when a new question starts; focus() here works on desktop.
+// On iOS the keyboard stays open because handleBlur refocuses within the gesture.
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) {
+    displayValue.value = ''
+    inputRef.value?.focus()
+  }
+})
 
 function handleInput(event) {
   if (!props.isEnabled) return
@@ -36,27 +35,25 @@ function handleKeydown(event) {
   if (event.key === 'Enter') {
     if (displayValue.value.length > 0) emit('submit', displayValue.value)
     event.preventDefault()
-    return
-  }
-
-  if (event.key === 'Backspace') {
+  } else if (event.key === 'Backspace') {
     displayValue.value = ''
     event.preventDefault()
   }
 }
 
-// iOS keyboard "return" dismisses keyboard via blur — treat as submit
+// iOS Return key or any keyboard dismiss fires blur.
+// Submit if ready, then synchronously re-focus — we're still inside the
+// user-gesture window so iOS honours focus() and keeps the keyboard alive.
 function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
   }
-  // Re-focus synchronously — still within the iOS gesture, keeps keyboard alive
   inputRef.value?.focus()
 }
 </script>
 
 <template>
-  <div class="flex flex-col items-center gap-3">
+  <div class="relative flex flex-col items-center gap-3">
     <div
       class="rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] cursor-text transition-colors"
       :class="isEnabled ? 'border-primary bg-white' : 'border-gray-300 bg-gray-100 opacity-60'"
@@ -70,25 +67,29 @@ function handleBlur() {
       </p>
     </div>
 
-    <!-- Hidden input to capture keyboard events reliably on mobile/desktop -->
+    <!--
+      NOT sr-only: that class uses clip+overflow:hidden which stops iOS showing the keyboard.
+      opacity-0 + absolute 1px keeps it focusable but invisible.
+    -->
     <input
       ref="inputRef"
-      class="sr-only"
       type="text"
       inputmode="text"
+      enterkeyhint="go"
       autocomplete="off"
-      aria-label="Type the starting letter then press Enter"
+      autocorrect="off"
+      autocapitalize="none"
+      spellcheck="false"
+      aria-label="Type the starting letter"
+      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
       @input="handleInput"
       @keydown="handleKeydown"
       @blur="handleBlur"
     />
 
     <p class="text-muted text-sm font-semibold">
-      {{
-        isEnabled
-          ? '⌨️ Type the letter, then press Enter ↵'
-          : '⏳ Get ready…'
-      }}
+      {{ isEnabled ? '⌨️ Type the letter, then press Enter ↵' : '⏳ Get ready…' }}
     </p>
   </div>
 </template>
+
