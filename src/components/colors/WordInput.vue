@@ -60,31 +60,32 @@ function handleBlur() {
 <template>
   <div class="relative flex flex-col items-center gap-4">
     <!--
-      NOT sr-only: clip+overflow:hidden prevents iOS from showing the keyboard.
-      opacity-0 absolute 1px is invisible but remains fully focusable.
+      Wrap slots in a relative container so the overlay input is clipped to the slots area.
+      Tapping any slot = direct tap on the <input> → native iOS keyboard.
     -->
-    <input
-      ref="inputRef"
-      type="text"
-      inputmode="text"
-      enterkeyhint="done"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="none"
-      spellcheck="false"
-      aria-label="Type the color name"
-      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
-      @input="handleInput"
-      @keydown="handleKeydown"
-      @blur="handleBlur"
-    />
+    <div class="relative flex gap-2 flex-wrap justify-center overflow-hidden rounded-xl p-1">
+      <!-- Overlay input: covers entire slots area -->
+      <input
+        ref="inputRef"
+        type="text"
+        inputmode="text"
+        enterkeyhint="done"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+        aria-label="Type the color name"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-text z-10"
+        style="font-size: 16px"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @blur="handleBlur"
+      />
 
-    <!-- Letter slots — tap anywhere to focus input -->
-    <div class="flex gap-2 flex-wrap justify-center" @click="inputRef?.focus()">
       <div
         v-for="i in wordLength"
         :key="i"
-        class="w-9 h-11 sm:w-12 sm:h-14 flex items-center justify-center rounded-xl border-4 text-lg sm:text-2xl font-extrabold select-none transition-all duration-150"
+        class="w-9 h-11 sm:w-12 sm:h-14 flex items-center justify-center rounded-xl border-4 text-lg sm:text-2xl font-extrabold select-none transition-all duration-150 pointer-events-none"
         :class="
           typed[i - 1]
             ? 'border-primary bg-primary text-white shadow-md'

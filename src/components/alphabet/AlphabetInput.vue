@@ -57,38 +57,39 @@ function handleBlur() {
 
 <template>
   <div class="relative flex flex-col items-center gap-3">
+    <!--
+      'relative overflow-hidden' so the transparent input overlay is clipped to the box.
+      Tapping anywhere on this box is a DIRECT tap on the <input> → iOS shows keyboard natively.
+    -->
     <div
-      class="rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] cursor-text transition-colors"
+      class="relative rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] transition-colors overflow-hidden"
       :class="isEnabled ? 'border-primary bg-white' : 'border-gray-300 bg-gray-100 opacity-60'"
-      @click="inputRef?.focus()"
     >
       <p
-        class="text-5xl sm:text-6xl font-extrabold leading-tight"
+        class="text-5xl sm:text-6xl font-extrabold leading-tight pointer-events-none select-none"
         :class="displayValue ? 'text-primary' : 'text-gray-300'"
       >
         {{ displayValue || '?' }}
       </p>
-    </div>
 
-    <!--
-      NOT sr-only: clip+overflow:hidden stops iOS showing the keyboard.
-      opacity-0 absolute 1px is invisible but fully focusable.
-    -->
-    <input
-      ref="inputRef"
-      type="text"
-      inputmode="text"
-      enterkeyhint="go"
-      autocomplete="off"
-      autocorrect="off"
-      autocapitalize="none"
-      spellcheck="false"
-      aria-label="Type the starting letter"
-      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
-      @input="handleInput"
-      @keydown="handleKeydown"
-      @blur="handleBlur"
-    />
+      <!-- Overlay input: invisible but covers the full box — direct tap = native iOS keyboard -->
+      <input
+        ref="inputRef"
+        type="text"
+        inputmode="text"
+        enterkeyhint="go"
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="none"
+        spellcheck="false"
+        aria-label="Type the starting letter"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-text"
+        style="font-size: 16px"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @blur="handleBlur"
+      />
+    </div>
 
     <p class="text-muted text-sm font-semibold">
       {{ isEnabled ? '⌨️ Type the letter, then press Enter ↵' : '⏳ Get ready…' }}

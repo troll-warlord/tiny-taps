@@ -55,29 +55,30 @@ function handleBlur() {
 <template>
   <div class="relative flex flex-col items-center gap-3">
     <div
-      class="rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] cursor-text transition-colors"
+      class="relative rounded-2xl border-4 px-6 sm:px-10 py-4 sm:py-5 text-center shadow-md min-w-[120px] sm:min-w-[140px] transition-colors overflow-hidden"
       :class="isEnabled ? 'border-primary bg-white' : 'border-gray-300 bg-gray-100 opacity-60'"
-      @click="inputRef?.focus()"
     >
       <p
-        class="text-5xl sm:text-6xl font-extrabold leading-tight"
+        class="text-5xl sm:text-6xl font-extrabold leading-tight pointer-events-none select-none"
         :class="displayValue ? 'text-primary' : 'text-gray-300'"
       >
         {{ displayValue || '?' }}
       </p>
-    </div>
 
-    <input
-      ref="inputRef"
-      type="text"
-      inputmode="numeric"
-      autocomplete="off"
-      aria-label="Type the count"
-      class="absolute top-0 left-0 w-px h-px opacity-0 pointer-events-none"
-      @input="handleInput"
-      @keydown="handleKeydown"
-      @blur="handleBlur"
-    />
+      <!-- Overlay input: invisible but covers the full box — direct tap = native iOS keyboard -->
+      <input
+        ref="inputRef"
+        type="text"
+        inputmode="numeric"
+        autocomplete="off"
+        aria-label="Type the count"
+        class="absolute inset-0 w-full h-full opacity-0 cursor-text"
+        style="font-size: 16px"
+        @input="handleInput"
+        @keydown="handleKeydown"
+        @blur="handleBlur"
+      />
+    </div>
 
     <p class="text-muted text-sm font-semibold">
       {{ isEnabled ? '⌨️ Type the number, then press Enter ↵' : '⏳ Get ready…' }}
