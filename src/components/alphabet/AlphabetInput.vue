@@ -50,6 +50,8 @@ function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
   }
+  // Re-focus synchronously — still within the iOS gesture, keeps keyboard alive
+  inputRef.value?.focus()
 }
 </script>
 

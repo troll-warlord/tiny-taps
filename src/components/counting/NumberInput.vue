@@ -50,6 +50,9 @@ function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
   }
+  // Re-focus synchronously inside the blur handler — this is still within
+  // the user gesture on iOS, so the keyboard stays visible for the next question
+  inputRef.value?.focus()
 }
 </script>
 
