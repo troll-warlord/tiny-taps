@@ -22,21 +22,19 @@ watch(
   { immediate: true },
 )
 
+function handleInput(event) {
+  if (!props.isEnabled) return
+  const ch = event.target.value.replace(/[^a-zA-Z]/g, '').slice(-1).toUpperCase()
+  if (ch) displayValue.value = ch
+  event.target.value = ''
+}
+
 function handleKeydown(event) {
   if (!props.isEnabled) return
   if (event.ctrlKey || event.altKey || event.metaKey) return
 
   if (event.key === 'Enter') {
-    if (displayValue.value.length > 0) {
-      emit('submit', displayValue.value)
-    }
-    event.preventDefault()
-    return
-  }
-
-  if (/^[a-zA-Z]$/.test(event.key)) {
-    // Only keep single letter — each Enter submits it
-    displayValue.value = event.key.toUpperCase()
+    if (displayValue.value.length > 0) emit('submit', displayValue.value)
     event.preventDefault()
     return
   }
@@ -68,10 +66,11 @@ function handleKeydown(event) {
       ref="inputRef"
       class="sr-only"
       type="text"
+      inputmode="text"
       autocomplete="off"
       :disabled="!isEnabled"
-      readonly
       aria-label="Type the starting letter then press Enter"
+      @input="handleInput"
       @keydown="handleKeydown"
     />
 

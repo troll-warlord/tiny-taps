@@ -23,19 +23,18 @@ watch(
   { immediate: true },
 )
 
+function handleInput(event) {
+  if (!props.isEnabled) return
+  const digits = event.target.value.replace(/\D/g, '').slice(0, 2)
+  if (digits) displayValue.value = digits
+  event.target.value = ''
+}
+
 function handleKeydown(event) {
   if (!props.isEnabled) return
 
   if (event.key === 'Enter') {
-    if (displayValue.value.length > 0) {
-      emit('submit', displayValue.value)
-    }
-    event.preventDefault()
-    return
-  }
-
-  if (/^\d$/.test(event.key) && displayValue.value.length < 2) {
-    displayValue.value += event.key
+    if (displayValue.value.length > 0) emit('submit', displayValue.value)
     event.preventDefault()
     return
   }
@@ -70,8 +69,8 @@ function handleKeydown(event) {
       type="text"
       inputmode="numeric"
       :disabled="!isEnabled"
-      readonly
       aria-label="Type the count then press Enter"
+      @input="handleInput"
       @keydown="handleKeydown"
     />
 

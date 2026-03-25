@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed, watch, onMounted, onUnmounted } from 'vue'
+import { ref, computed, watch, onMounted, nextTick } from 'vue'
 
 const props = defineProps({
   wordLength: { type: Number, required: true },
@@ -8,17 +8,36 @@ const props = defineProps({
 
 const emit = defineEmits(['submit'])
 
+const inputRef = ref(null)
 const typed = ref([])
 
 const isFull = computed(() => typed.value.length === props.wordLength)
 
-// Reset slots whenever a new question begins
+// Reset slots and refocus whenever a new question begins
 watch(
   () => props.isEnabled,
-  (enabled) => {
-    if (enabled) typed.value = []
+  async (enabled) => {
+    if (enabled) {
+      typed.value = []
+      await nextTick()
+      inputRef.value?.focus()
+    }
   },
 )
+
+onMounted(async () => {
+  await nextTick()
+  if (props.isEnabled) inputRef.value?.focus()
+})
+
+function handleInput(event) {
+  if (!props.isEnabled) return
+  const letters = event.target.value.replace(/[^a-zA-Z]/g, '')
+  for (const ch of letters) {
+    if (!isFull.value) typed.value = [...typed.value, ch.toUpperCase()]
+  }
+  event.target.value = ''
+}
 
 function handleKeydown(event) {
   if (!props.isEnabled) return
@@ -30,26 +49,30 @@ function handleKeydown(event) {
     return
   }
 
-  if (/^[a-zA-Z]$/.test(event.key) && !isFull.value) {
-    typed.value = [...typed.value, event.key.toUpperCase()]
-    event.preventDefault()
-    return
-  }
-
   if (event.key === 'Backspace') {
     typed.value = typed.value.slice(0, -1)
     event.preventDefault()
   }
 }
-
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
   <div class="flex flex-col items-center gap-4">
+    <!-- Hidden input to capture keyboard on mobile and desktop -->
+    <input
+      ref="inputRef"
+      class="sr-only"
+      type="text"
+      inputmode="text"
+      autocomplete="off"
+      :disabled="!isEnabled"
+      aria-label="Type the color name"
+      @input="handleInput"
+      @keydown="handleKeydown"
+    />
+
     <!-- Letter slots -->
-    <div class="flex gap-2 flex-wrap justify-center">
+    <div class="flex gap-2 flex-wrap justify-center" @click="inputRef?.focus()">
       <div
         v-for="i in wordLength"
         :key="i"
