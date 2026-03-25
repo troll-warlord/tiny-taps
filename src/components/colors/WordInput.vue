@@ -4,6 +4,7 @@ import { ref, computed, watch, onMounted } from 'vue'
 const props = defineProps({
   wordLength: { type: Number, required: true },
   isEnabled: { type: Boolean, default: true },
+  questionKey: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['submit'])
@@ -15,15 +16,18 @@ const isFull = computed(() => typed.value.length === props.wordLength)
 
 onMounted(() => inputRef.value?.focus())
 
-watch(() => props.isEnabled, (enabled) => {
-  if (enabled) {
-    typed.value = []
-    inputRef.value?.focus()
-  }
+// Reset typed slots when a NEW question arrives
+watch(() => props.questionKey, () => {
+  typed.value = []
 })
 
+// Re-focus when input becomes enabled (new question ready)
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) inputRef.value?.focus()
+})
+
+// No isEnabled guard — always update slots so typing feels instant
 function handleInput(event) {
-  if (!props.isEnabled) return
   const letters = event.target.value.replace(/[^a-zA-Z]/g, '')
   for (const ch of letters) {
     if (!isFull.value) typed.value = [...typed.value, ch.toUpperCase()]

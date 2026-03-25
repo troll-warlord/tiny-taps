@@ -7,6 +7,7 @@ import NumberInput from '@/components/counting/NumberInput.vue'
 import FeedbackDisplay from '@/components/common/FeedbackDisplay.vue'
 import ScoreDisplay from '@/components/common/ScoreDisplay.vue'
 import RetryDisplay from '@/components/common/RetryDisplay.vue'
+import StreakDisplay from '@/components/common/StreakDisplay.vue'
 import GameOverScreen from '@/components/common/GameOverScreen.vue'
 import ProgressBar from '@/components/common/ProgressBar.vue'
 
@@ -41,6 +42,9 @@ onUnmounted(() => store.reset())
         <RetryDisplay :retries-left="store.retriesLeft" />
       </div>
 
+      <!-- Streak -->
+      <StreakDisplay :streak="store.streak" />
+
       <!-- Progress -->
       <ProgressBar :current="store.currentIndex + 1" :total="store.totalQuestions" />
 
@@ -56,7 +60,7 @@ onUnmounted(() => store.reset())
       <FeedbackDisplay :feedback="store.feedback" />
 
       <!-- Numeric input with Enter to submit -->
-      <NumberInput :is-enabled="inputEnabled" @submit="handleSubmit" />
+      <NumberInput :is-enabled="inputEnabled" :question-key="store.currentIndex" @submit="handleSubmit" />
     </template>
 
     <GameOverScreen

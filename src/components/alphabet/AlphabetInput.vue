@@ -3,6 +3,8 @@ import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   isEnabled: { type: Boolean, default: true },
+  // Changes every new question — used to reset the display box cleanly
+  questionKey: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['submit'])
@@ -12,17 +14,19 @@ const displayValue = ref('')
 
 onMounted(() => inputRef.value?.focus())
 
-// Reset value when a new question starts; focus() here works on desktop.
-// On iOS the keyboard stays open because handleBlur refocuses within the gesture.
-watch(() => props.isEnabled, (enabled) => {
-  if (enabled) {
-    displayValue.value = ''
-    inputRef.value?.focus()
-  }
+// Reset display when a NEW question arrives (not on every isEnabled toggle)
+watch(() => props.questionKey, () => {
+  displayValue.value = ''
 })
 
+// Re-focus when input becomes enabled (new question ready)
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) inputRef.value?.focus()
+})
+
+// No isEnabled guard here — always show typed letter so the box feels responsive
+// even during the brief transition between questions
 function handleInput(event) {
-  if (!props.isEnabled) return
   const ch = event.target.value.replace(/[^a-zA-Z]/g, '').slice(-1).toUpperCase()
   if (ch) displayValue.value = ch
   event.target.value = ''
@@ -41,9 +45,8 @@ function handleKeydown(event) {
   }
 }
 
-// iOS Return key or any keyboard dismiss fires blur.
-// Submit if ready, then synchronously re-focus — we're still inside the
-// user-gesture window so iOS honours focus() and keeps the keyboard alive.
+// iOS Return/Done fires blur instead of Enter.
+// Re-focus synchronously within the gesture so iOS keeps the keyboard open.
 function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
@@ -68,8 +71,8 @@ function handleBlur() {
     </div>
 
     <!--
-      NOT sr-only: that class uses clip+overflow:hidden which stops iOS showing the keyboard.
-      opacity-0 + absolute 1px keeps it focusable but invisible.
+      NOT sr-only: clip+overflow:hidden stops iOS showing the keyboard.
+      opacity-0 absolute 1px is invisible but fully focusable.
     -->
     <input
       ref="inputRef"

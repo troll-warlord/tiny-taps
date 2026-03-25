@@ -3,6 +3,7 @@ import { ref, watch, onMounted } from 'vue'
 
 const props = defineProps({
   isEnabled: { type: Boolean, default: true },
+  questionKey: { type: Number, default: 0 },
 })
 
 const emit = defineEmits(['submit'])
@@ -12,15 +13,18 @@ const displayValue = ref('')
 
 onMounted(() => inputRef.value?.focus())
 
-watch(() => props.isEnabled, (enabled) => {
-  if (enabled) {
-    displayValue.value = ''
-    inputRef.value?.focus()
-  }
+// Reset display when a NEW question arrives
+watch(() => props.questionKey, () => {
+  displayValue.value = ''
 })
 
+// Re-focus when input becomes enabled (new question ready)
+watch(() => props.isEnabled, (enabled) => {
+  if (enabled) inputRef.value?.focus()
+})
+
+// No isEnabled guard  always update the display so typing feels instant
 function handleInput(event) {
-  if (!props.isEnabled) return
   const digits = event.target.value.replace(/\D/g, '').slice(0, 2)
   if (digits) displayValue.value = digits
   event.target.value = ''
@@ -39,7 +43,7 @@ function handleKeydown(event) {
 }
 
 // iOS numpad "Done" fires blur instead of Enter.
-// Submit + synchronously re-focus within the gesture to keep keyboard alive.
+// Re-focus synchronously within the gesture to keep keyboard open.
 function handleBlur() {
   if (props.isEnabled && displayValue.value.length > 0) {
     emit('submit', displayValue.value)
@@ -80,4 +84,3 @@ function handleBlur() {
     </p>
   </div>
 </template>
-
