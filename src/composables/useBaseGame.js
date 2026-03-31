@@ -28,6 +28,19 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
     Math.round(((currentIndex.value + 1) / questionsRef.value.length) * 100),
   )
 
+  // Track pending timers so they can be cancelled on reset.
+  // Cancelling them also unblocks bfcache (browsers refuse to cache a page
+  // that has pending JS tasks from an in-flight setTimeout).
+  const pendingTimers = []
+  function schedule(fn, delay) {
+    const id = setTimeout(() => {
+      const idx = pendingTimers.indexOf(id)
+      if (idx !== -1) pendingTimers.splice(idx, 1)
+      fn()
+    }, delay)
+    pendingTimers.push(id)
+  }
+
   function submitAnswer(input) {
     if (isTransitioning.value || isGameOver.value) return
     isTransitioning.value = true
@@ -42,8 +55,8 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
       streak.value++
       feedback.value = 'correct'
       if (revealAnswer) showReveal.value = true
-      setTimeout(() => { feedback.value = null }, FEEDBACK_DURATION_MS)
-      setTimeout(() => {
+      schedule(() => { feedback.value = null }, FEEDBACK_DURATION_MS)
+      schedule(() => {
         showReveal.value = false
         isTransitioning.value = false
         moveToNext()
@@ -54,12 +67,12 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
       feedback.value = 'wrong'
       const lastAttempt = retriesLeft.value <= 0
       if (lastAttempt && revealAnswer) showReveal.value = true
-      setTimeout(() => {
+      schedule(() => {
         feedback.value = null
         if (!lastAttempt) isTransitioning.value = false
       }, FEEDBACK_DURATION_MS)
       if (lastAttempt) {
-        setTimeout(() => {
+        schedule(() => {
           showReveal.value = false
           isTransitioning.value = false
           moveToNext()
@@ -78,6 +91,8 @@ export function useBaseGame(questionsOrRef, isCorrectAnswer, options = {}) {
   }
 
   function reset() {
+    pendingTimers.forEach(clearTimeout)
+    pendingTimers.length = 0
     score.value = 0
     streak.value = 0
     currentIndex.value = 0

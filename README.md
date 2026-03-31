@@ -5,12 +5,15 @@ A fun, interactive learning game app for kids - built with Vue 3, Pinia, Vue Rou
 ## Games
 
 ### 🔤 Alphabet Game
+
 A picture appears on screen. Type the letter it starts with and press **Enter**. 52 images (2 per letter A–Z) shown in random order each round. The word is revealed after a correct answer or after 3 failed attempts, with the first letter highlighted.
 
 ### 🔢 Counting Game
+
 A group of objects appears on screen. Type how many you count and press **Enter**. Numbers 1–10, with a different object for each, shown in random order each round.
 
 ### 🎨 Colors Game
+
 A color swatch is shown. Type the full color name letter by letter and press **Enter** to submit. 12 colors shown in random order each round.
 
 ## Features
@@ -31,15 +34,24 @@ npm install
 npm run dev
 ```
 
-Open http://localhost:5173 in your browser.
+Open <http://localhost:5173> in your browser.
+
+## Lint
+
+```bash
+npm run lint
+```
 
 ## Build
 
 ```bash
 npm run build
+npm run preview   # serve the production build locally
 ```
 
 Output goes to the `dist/` folder.
+
+> **Note:** Run Lighthouse against `npm run preview`, not `npm run dev`. The dev server intentionally skips minification and injects HMR tooling, which inflates JS size in audits.
 
 ## Deploy
 

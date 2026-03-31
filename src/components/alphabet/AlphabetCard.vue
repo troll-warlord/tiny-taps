@@ -18,12 +18,15 @@ defineProps({
       </div>
 
       <!-- Revealed word with highlighted first letter -->
-      <Transition name="reveal">
-        <p v-if="showReveal" class="text-3xl font-extrabold text-text mt-1">
-          <span class="text-primary underline decoration-4">{{ question.word[0] }}</span>{{ question.word.slice(1) }}
-        </p>
-        <p v-else class="text-muted text-lg">What letter does this start with?</p>
-      </Transition>
+      <!-- Fixed height matches text-3xl line-height, prevents card from resizing on reveal -->
+      <div class="min-h-[2.25rem] flex items-center justify-center">
+        <Transition name="reveal" mode="out-in">
+          <p v-if="showReveal" class="text-3xl font-extrabold text-text">
+            <span class="text-primary underline decoration-4">{{ question.word[0] }}</span>{{ question.word.slice(1) }}
+          </p>
+          <p v-else class="text-muted text-lg">What letter does this start with?</p>
+        </Transition>
+      </div>
     </div>
   </div>
 </template>

@@ -23,11 +23,13 @@ watch(() => props.isEnabled, (enabled) => {
   if (enabled) inputRef.value?.focus()
 })
 
-// No isEnabled guard  always update the display so typing feels instant
+// No isEnabled guard — always update the display so typing feels instant
 function handleInput(event) {
-  const digits = event.target.value.replace(/\D/g, '').slice(0, 2)
-  if (digits) displayValue.value = digits
+  const newChars = event.target.value.replace(/\D/g, '')
   event.target.value = ''
+  if (!newChars) return
+  // Append to existing display value (required for two-digit numbers like 10)
+  displayValue.value = (displayValue.value + newChars).slice(0, 2)
 }
 
 function handleKeydown(event) {
